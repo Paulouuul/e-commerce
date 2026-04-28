@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Usuários
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  password      String?   // Só para login com email/senha
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  cart          Cart?
+  reviews       Review[]
+  
+  @@map("users")
+}
+
+// Autenticação OAuth
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+// Sessões
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+}
+
+// Produtos
+model Product {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String    @db.Text
+  price       Float
+  comparePrice Float?   // Preço original para mostrar desconto
+  costPrice   Float?    // Preço de custo (admin)
+  images      String[]  // Array de URLs das imagens
+  category    String
+  tags        String[]
+  stock       Int       @default(0)
+  sku         String    @unique
+  rating      Float     @default(0)
+  numReviews  Int       @default(0)
+  isActive    Boolean   @default(true)
+  isFeatured  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  reviews     Review[]
+  
+  @@index([slug])
+  @@index([category])
+  @@map("products")
+}
+
+// Carrinho (1 por usuário não logado via session ID)
+model Cart {
+  id         String     @id @default(cuid())
+  sessionId  String?    @unique // Para usuários não logados
+  userId     String?    @unique // Para usuários logados
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  
+  user       User?      @relation(fields: [userId], references: [id])
+  items      CartItem[]
+  
+  @@map("carts")
+}
+
+// Itens do Carrinho
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+  
+  @@unique([cartId, productId])
+  @@map("cart_items")
+}
+
+// Pedidos
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  userId          String
+  status          OrderStatus @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentIntentId String?     @unique // Stripe Payment Intent ID
+  
+  subtotal        Float
+  shippingCost    Float       @default(0)
+  tax             Float       @default(0)
+  discount        Float       @default(0)
+  total           Float
+  
+  shippingAddress Json        // Endereço de entrega
+  billingAddress  Json?       // Endereço de faturamento
+  
+  stripeSessionId String?
+  paidAt          DateTime?
+  deliveredAt     DateTime?
+  canceledAt      DateTime?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  user            User        @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+  
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@map("orders")
+}
+
+// Itens do Pedido
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float    // Preço na hora da compra
+  name      String   // Nome do produto (snapshot)
+  image     String?  // Imagem do produto (snapshot)
+  
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+  
+  @@map("order_items")
+}
+
+// Avaliações
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int
+  title     String?
+  comment   String   @db.Text
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, productId])
+  @@index([productId])
+  @@map("reviews")
+}
+
+// Enums
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
