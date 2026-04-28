@@ -1,1 +1,156 @@
-#
+# Dependências
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Testes
+/coverage
+/.nyc_output
+/cypress/downloads
+/cypress/screenshots
+/cypress/videos
+
+# Next.js
+/.next/
+/out/
+/build
+/dist
+
+# Produção
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.env
+.env*.local
+.env*.development
+.env*.production
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Prisma
+prisma/*.db
+prisma/*.db-journal
+prisma/migrations/*.db
+
+# Redis
+dump.rdb
+
+# Stripe
+stripe.webhook.secret
+
+# Banco de dados local
+*.sql
+*.sqlite
+*.db
+
+# Arquivos de sessão
+.session
+.session-jwt
+
+# Logs
+logs
+*.log
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Relatórios de cobertura
+coverage/
+.nyc_output/
+
+# Arquivos de build
+dist/
+build/
+
+# Arquivos de cache
+.cache/
+.parcel-cache/
+
+# Arquivos temporários
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# Arquivos do sistema
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Arquivos de backup
+*.bak
+*.backup
+*.swp
+*.swo
+*~
+
+# Arquivos específicos do projeto
+public/uploads/
+public/temp/
+.next/cache/
+prisma/seed.js
+prisma/seed.ts
+
+# Chaves e certificados
+*.pem
+*.key
+*.crt
+*.p12
+.secrets/
+.credentials/
+
+# Docker
+docker-compose.override.yml
+.docker/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Next.js specific
+.next.bak/
+out.bak/
+
+# Turbo (se usar Turborepo)
+.turbo
+
+# Environment variables
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Debug
+debug.log
+debug.*.log
+
+# Mongoose (se usar)
+node_modules/.bin/mongoose
+
+# Stripe CLI
+stripe-cli/
