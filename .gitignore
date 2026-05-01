@@ -117,8 +117,6 @@ $RECYCLE.BIN/
 public/uploads/
 public/temp/
 .next/cache/
-prisma/seed.js
-prisma/seed.ts
 
 # Chaves e certificados
 *.pem

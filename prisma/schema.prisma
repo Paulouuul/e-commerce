@@ -7,189 +7,154 @@ datasource db {
   provider = "postgresql"
 }
 
-// Usuários
-model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  image         String?
-  password      String?   // Só para login com email/senha
-  emailVerified DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
-  accounts      Account[]
-  sessions      Session[]
-  orders        Order[]
-  cart          Cart?
-  reviews       Review[]
-  
-  @@map("users")
-}
-
-// Autenticação OAuth
-model Account {
+model accounts {
   id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  users             users   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([provider, providerAccountId])
-  @@map("accounts")
 }
 
-// Sessões
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  @@map("sessions")
-}
-
-// Produtos
-model Product {
-  id          String    @id @default(cuid())
-  name        String
-  slug        String    @unique
-  description String    @db.Text
-  price       Float
-  comparePrice Float?   // Preço original para mostrar desconto
-  costPrice   Float?    // Preço de custo (admin)
-  images      String[]  // Array de URLs das imagens
-  category    String
-  tags        String[]
-  stock       Int       @default(0)
-  sku         String    @unique
-  rating      Float     @default(0)
-  numReviews  Int       @default(0)
-  isActive    Boolean   @default(true)
-  isFeatured  Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
-  cartItems   CartItem[]
-  orderItems  OrderItem[]
-  reviews     Review[]
-  
-  @@index([slug])
-  @@index([category])
-  @@map("products")
-}
-
-// Carrinho (1 por usuário não logado via session ID)
-model Cart {
-  id         String     @id @default(cuid())
-  sessionId  String?    @unique // Para usuários não logados
-  userId     String?    @unique // Para usuários logados
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  
-  user       User?      @relation(fields: [userId], references: [id])
-  items      CartItem[]
-  
-  @@map("carts")
-}
-
-// Itens do Carrinho
-model CartItem {
+model cart_items {
   id        String   @id @default(cuid())
   cartId    String
   productId String
   quantity  Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
-  
+  carts     carts    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  products  products @relation(fields: [productId], references: [id])
+
   @@unique([cartId, productId])
-  @@map("cart_items")
 }
 
-// Pedidos
-model Order {
-  id              String      @id @default(cuid())
-  orderNumber     String      @unique
-  userId          String
-  status          OrderStatus @default(PENDING)
-  paymentStatus   PaymentStatus @default(PENDING)
-  paymentIntentId String?     @unique // Stripe Payment Intent ID
-  
-  subtotal        Float
-  shippingCost    Float       @default(0)
-  tax             Float       @default(0)
-  discount        Float       @default(0)
-  total           Float
-  
-  shippingAddress Json        // Endereço de entrega
-  billingAddress  Json?       // Endereço de faturamento
-  
-  stripeSessionId String?
-  paidAt          DateTime?
-  deliveredAt     DateTime?
-  canceledAt      DateTime?
-  
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  
-  user            User        @relation(fields: [userId], references: [id])
-  items           OrderItem[]
-  
-  @@index([userId])
-  @@index([orderNumber])
-  @@index([status])
-  @@map("orders")
+model carts {
+  id         String       @id @default(cuid())
+  sessionId  String?      @unique
+  userId     String?      @unique
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  cart_items cart_items[]
+  users      users?       @relation(fields: [userId], references: [id])
 }
 
-// Itens do Pedido
-model OrderItem {
+model order_items {
   id        String   @id @default(cuid())
   orderId   String
   productId String
   quantity  Int
-  price     Float    // Preço na hora da compra
-  name      String   // Nome do produto (snapshot)
-  image     String?  // Imagem do produto (snapshot)
-  
-  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
-  
-  @@map("order_items")
+  price     Float
+  name      String
+  image     String?
+  orders    orders   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  products  products @relation(fields: [productId], references: [id])
 }
 
-// Avaliações
-model Review {
+model orders {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique
+  userId          String
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentIntentId String?       @unique
+  subtotal        Float
+  shippingCost    Float         @default(0)
+  tax             Float         @default(0)
+  discount        Float         @default(0)
+  total           Float
+  shippingAddress Json
+  billingAddress  Json?
+  stripeSessionId String?
+  paidAt          DateTime?
+  deliveredAt     DateTime?
+  canceledAt      DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  order_items     order_items[]
+  users           users         @relation(fields: [userId], references: [id])
+
+  @@index([orderNumber])
+  @@index([status])
+  @@index([userId])
+}
+
+model products {
+  id           String        @id @default(cuid())
+  name         String
+  slug         String        @unique
+  description  String
+  price        Float
+  comparePrice Float?
+  costPrice    Float?
+  images       String[]
+  category     String
+  tags         String[]
+  stock        Int           @default(0)
+  sku          String        @unique
+  rating       Float         @default(0)
+  numReviews   Int           @default(0)
+  isActive     Boolean       @default(true)
+  isFeatured   Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  cart_items   cart_items[]
+  order_items  order_items[]
+  reviews      reviews[]
+
+  @@index([category])
+  @@index([slug])
+}
+
+model reviews {
   id        String   @id @default(cuid())
   rating    Int
   title     String?
-  comment   String   @db.Text
+  comment   String
   userId    String
   productId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  user    User    @relation(fields: [userId], references: [id])
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
+  products  products @relation(fields: [productId], references: [id], onDelete: Cascade)
+  users     users    @relation(fields: [userId], references: [id])
+
   @@unique([userId, productId])
   @@index([productId])
-  @@map("reviews")
 }
 
-// Enums
+model sessions {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  users        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model users {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  name          String?
+  image         String?
+  password      String?
+  emailVerified DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  accounts      accounts[]
+  carts         carts?
+  orders        orders[]
+  reviews       reviews[]
+  sessions      sessions[]
+}
+
 enum OrderStatus {
   PENDING
   PROCESSING

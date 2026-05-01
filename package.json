@@ -14,17 +14,21 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e": "cypress open",
-    "test:e2e:run": "cypress run"
+    "test:e2e:run": "cypress run",
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
+    "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@stripe/stripe-js": "^9.3.1",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.25.1",
     "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
     "next": "^16.2.4",
     "next-auth": "^5.0.0-beta.25",
+    "pg": "^8.20.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.48.2",
@@ -39,6 +43,7 @@
     "@types/bcryptjs": "^3.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.15.3",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
@@ -48,6 +53,7 @@
     "eslint-config-next": "^16.2.4",
     "jest": "^30.3.0",
     "prisma": "^7.8.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.3"
   },
   "description": "E-commerce full-stack com Next.js 16, Prisma 7, Stripe e Tailwind CSS",
