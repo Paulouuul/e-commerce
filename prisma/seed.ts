@@ -26,7 +26,7 @@ console.log('5. PrismaClient criado:', !!prisma)
 console.log('6. PrismaClient.product existe?', !!prisma?.products)
 
 async function main() {
-  console.log('🌱 Starting seed...')
+  console.log('Starting seed...')
 
   // Limpar dados existentes (opcional)
   console.log('8. Tentando deleteMany...')
