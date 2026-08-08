@@ -23,3 +23,16 @@ export function LoadingSpinner({
     </div>
   );
 }
+
+interface LoadingMoreProps {
+  text?: string;
+}
+
+export function LoadingMore({ text }: LoadingMoreProps) {
+  return (
+    <div className="flex justify-center py-8">
+      <Loader2 className="w-6 h-6 text-purple-500 animate-spin" />
+      {text && <span className="ml-2 text-slate-400">{text}</span>}
+    </div>
+  );
+}

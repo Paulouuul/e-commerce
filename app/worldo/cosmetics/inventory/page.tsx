@@ -6,9 +6,9 @@ import { ClientImage } from '@/components/ClientImage';
 import Link from 'next/link';
 import { getRarityDesigns, RARITY, Rarity } from '@/constants/cosmeticRarity';
 import { CosmeticActionModal } from '@/components/CosmeticActionModal';
-import { Package, Search, Plus, X, Loader2, Store, CheckCircle, Box } from 'lucide-react';
+import { Package, Search, Plus, X, Store, CheckCircle, Box } from 'lucide-react';
 import { formatItemCount } from '@/lib/format-utils';
-import { LoadingSpinner } from '@/components/Loading';
+import { LoadingMore, LoadingSpinner } from '@/components/Loading';
 
 interface GroupedItem {
   id: string;
@@ -79,7 +79,7 @@ export default function MyCosmeticsPage() {
         }
 
         const res = await fetch(
-          `/api/cosmetics/inventory/grouped?page=${page}&limit=50&filter=${activeFilter}&search=${encodeURIComponent(searchTerm)}&rarity=${rarityFilter}&sort=${sort}`,
+          `/api/cosmetics/inventory/grouped?page=${page}&limit=30&filter=${activeFilter}&search=${encodeURIComponent(searchTerm)}&rarity=${rarityFilter}&sort=${sort}`,
         );
         if (!res.ok) throw new Error('Falha ao sincronizar inventário');
 
@@ -417,9 +417,7 @@ export default function MyCosmeticsPage() {
             </div>
 
             {loadingMore && (
-              <div className="flex justify-center py-8">
-                <Loader2 className="w-6 h-6 text-purple-500 animate-spin" />
-              </div>
+              <LoadingMore text="Carregando mais items..." />
             )}
 
             {hasMore && !loading && !loadingMore && <div ref={loadMoreRef} className="h-10" />}

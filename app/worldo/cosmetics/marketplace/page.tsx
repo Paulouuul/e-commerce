@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { ClientImage } from '@/components/ClientImage';
 import Link from 'next/link';
 import { Search, Coins, User, Package, Sparkles, Store, X } from 'lucide-react';
 import { formatItemCount } from '@/lib/format-utils';
 import { getRarityDesigns, RARITY, Rarity } from '@/constants/cosmeticRarity';
+import { LoadingMore } from '@/components/Loading';
 
 interface MarketplaceListing {
   id: string;
@@ -32,41 +33,100 @@ export default function MarketplacePage() {
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [ownedItems, setOwnedItems] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [rarityFilter, setRarityFilter] = useState<'all' | Rarity>('all');
   const [sort, setSort] = useState('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const rarityOptions = ['all', RARITY.COMUM, RARITY.RARO, RARITY.EPICO, RARITY.LENDARIO];
 
-  useEffect(() => {
-    setLoading(true);
-    const url = new URL('/api/cosmetics/marketplace', window.location.origin);
+  // Função para carregar listings com PAGINAÇÃO
+  const fetchListings = useCallback(async (page: number, isLoadMore = false) => {
+    try {
+      if (isLoadMore) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
 
-    if (rarityFilter !== 'all') url.searchParams.set('rarity', rarityFilter);
-    url.searchParams.set('sort', sort);
-    url.searchParams.set('limit', '50');
+      const url = new URL('/api/cosmetics/marketplace', window.location.origin);
 
-    if (searchTerm) {
-      url.searchParams.set('search', searchTerm);
-    }
+      if (rarityFilter !== 'all') url.searchParams.set('rarity', rarityFilter);
+      url.searchParams.set('sort', sort);
+      url.searchParams.set('limit', '50');
+      url.searchParams.set('page', page.toString());
 
-    fetch(url.toString())
-      .then((res) => res.json())
-      .then((data) => {
+      if (searchTerm) {
+        url.searchParams.set('search', searchTerm);
+      }
+
+      const res = await fetch(url.toString());
+      const data = await res.json();
+
+      if (isLoadMore) {
+        setListings(prev => [...prev, ...data.listings]);
+      } else {
         setListings(data.listings || []);
         setOwnedItems(data.ownedFrameIds || []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Erro ao carregar marketplace:', err);
-        setLoading(false);
-      });
+      }
+
+      // Usando totalPages para calcular hasMore
+      const totalPages = data.totalPages || 1;
+      setCurrentPage(page);
+      setHasMore(page < totalPages);
+      
+    } catch (err) {
+      console.error('Erro ao carregar marketplace:', err);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
   }, [rarityFilter, sort, searchTerm]);
 
+  // Load inicial com debounce
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setListings([]);
+      setCurrentPage(1);
+      setHasMore(true);
+      fetchListings(1, false);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [rarityFilter, sort, searchTerm, fetchListings]);
+
+  // Intersection Observer para SCROLL INFINITO
+  useEffect(() => {
+    if (loading || loadingMore || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          fetchListings(currentPage + 1, true);
+        }
+      },
+      { 
+        threshold: 0.1,
+        rootMargin: '100px'
+      }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [loading, loadingMore, hasMore, currentPage, fetchListings]);
+
+  // Telas de loading
   if (loading && listings.length === 0) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500" />
       </div>
     );
   }
@@ -83,6 +143,11 @@ export default function MarketplacePage() {
           <p className="text-slate-400 text-xs sm:text-sm mt-1.5 font-medium">
             Adquira cosméticos exclusivos de outros usuários
           </p>
+          {listings.length > 0 && (
+            <p className="text-xs text-slate-500 mt-1">
+              {listings.length} ofertas encontradas
+            </p>
+          )}
         </div>
         {session && (
           <Link
@@ -95,7 +160,7 @@ export default function MarketplacePage() {
         )}
       </div>
 
-      {/* Filtros - mesmo estilo do inventário */}
+      {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="flex-1 relative">
           <button
@@ -139,7 +204,7 @@ export default function MarketplacePage() {
         </div>
       </div>
 
-      {/* Ordenação - mesmo estilo do inventário */}
+      {/* Ordenação */}
       <div className="flex items-center gap-2 mb-6">
         <span className="text-xs text-slate-500 font-medium mr-2">Ordenar por:</span>
         <button
@@ -184,7 +249,7 @@ export default function MarketplacePage() {
         </button>
       </div>
 
-      {/* Grid Premium */}
+      {/* Grid */}
       {listings.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-slate-900/20 border border-slate-800/50 rounded-2xl border-dashed">
           <Sparkles className="w-16 h-16 text-slate-700 mb-4 animate-pulse" />
@@ -196,73 +261,81 @@ export default function MarketplacePage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 min-[480px]:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-4 sm:gap-6">
-          {listings.map((listing) => {
-            const isOwned = ownedItems.includes(listing.frame.id);
-            const config =
-              rarityDesigns[listing.frame.rarity?.toUpperCase()] || rarityDesigns.COMUM;
+        <>
+          <div className="grid grid-cols-2 min-[480px]:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-4 sm:gap-6">
+            {listings.map((listing) => {
+              const isOwned = ownedItems.includes(listing.frame.id);
+              const config = rarityDesigns[listing.frame.rarity?.toUpperCase()] || rarityDesigns.COMUM;
 
-            return (
-              <Link
-                key={listing.id}
-                href={`/worldo/cosmetics/marketplace/${listing.id}`}
-                className={`group relative flex flex-col items-center justify-between p-3 sm:p-4 h-62.5 sm:h-67.5 rounded-2xl border overflow-hidden transition-all duration-300 ease-out cursor-pointer hover:-translate-y-2 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-purple-500/50 ${config.cardClass}`}
-              >
-                {/* Efeitos de fundo da Raridade */}
-                {config.bgDecoration}
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-size-[0.4rem_0.4rem] opacity-[0.05]" />
-
-                {/* Header: Preço e Status/Quantidade */}
-                <div className="w-full flex justify-between items-start z-20 mb-2 gap-2">
-                  <span className="flex items-center gap-1 text-[10px] font-black text-amber-400 bg-amber-950/90 border border-amber-500/40 px-2 py-1 rounded-md shadow-[0_0_10px_rgba(245,158,11,0.2)] tracking-wider backdrop-blur-sm">
-                    <Coins className="w-3 h-3" /> {formatItemCount(listing.priceCoins)}
-                  </span>
-
-                  {isOwned ? (
-                    <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 font-black text-[9px] px-1.5 py-1 rounded-md shadow-lg backdrop-blur-md flex items-center uppercase shrink-0">
-                      ✓ Adquirido
-                    </span>
-                  ) : (
-                    <span className="bg-slate-950/90 backdrop-blur-md border border-slate-700/80 text-slate-200 font-black text-[10px] px-2 py-1 rounded-md shadow-lg shrink-0">
-                      x{formatItemCount(listing.quantity)}
-                    </span>
-                  )}
-                </div>
-
-                {/* Imagem da Moldura */}
-                <div
-                  className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden border bg-slate-900/90 flex items-center justify-center z-10 transition-transform duration-500 group-hover:scale-110 shadow-xl ${config.borderClass}`}
+              return (
+                <Link
+                  key={listing.id}
+                  href={`/worldo/cosmetics/marketplace/${listing.id}`}
+                  className={`group relative flex flex-col items-center justify-between p-3 sm:p-4 h-62.5 sm:h-67.5 rounded-2xl border overflow-hidden transition-all duration-300 ease-out cursor-pointer hover:-translate-y-2 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-purple-500/50 ${config.cardClass}`}
                 >
-                  <ClientImage
-                    src={listing.frame.thumbnailUrl || listing.frame.imageUrl}
-                    alt={listing.frame.name}
-                    fill
-                    className="object-cover drop-shadow-2xl"
-                    sizes="(max-width: 640px) 96px, 112px"
-                    unoptimized
-                  />
-                </div>
+                  {config.bgDecoration}
+                  <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-size-[0.4rem_0.4rem] opacity-[0.05]" />
 
-                {/* Pílula de Raridade flutuando sobre a imagem */}
-                <div className="relative w-full flex justify-center z-20 mt-1 h-6">
-                  {config.badge}
-                </div>
-                {/* Footer: Nome da Moldura e Vendedor */}
-                <div className="mt-auto w-full z-10 pt-2 border-t border-slate-800/40 flex flex-col items-center">
-                  <span
-                    className={`block text-xs sm:text-sm text-center px-1 truncate w-full drop-shadow-md ${config.textClass}`}
-                  >
-                    {listing.frame.name}
-                  </span>
-                  <div className="flex items-center gap-1 text-[9px] text-slate-500 mt-0.5 truncate max-w-full">
-                    <User className="w-2.5 h-2.5 shrink-0" />
-                    <span className="truncate">{listing.seller.name}</span>
+                  <div className="w-full flex justify-between items-start z-20 mb-2 gap-2">
+                    <span className="flex items-center gap-1 text-[10px] font-black text-amber-400 bg-amber-950/90 border border-amber-500/40 px-2 py-1 rounded-md shadow-[0_0_10px_rgba(245,158,11,0.2)] tracking-wider backdrop-blur-sm">
+                      <Coins className="w-3 h-3" /> {formatItemCount(listing.priceCoins)}
+                    </span>
+
+                    {isOwned ? (
+                      <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 font-black text-[9px] px-1.5 py-1 rounded-md shadow-lg backdrop-blur-md flex items-center uppercase shrink-0">
+                        ✓ Adquirido
+                      </span>
+                    ) : (
+                      <span className="bg-slate-950/90 backdrop-blur-md border border-slate-700/80 text-slate-200 font-black text-[10px] px-2 py-1 rounded-md shadow-lg shrink-0">
+                        x{formatItemCount(listing.quantity)}
+                      </span>
+                    )}
                   </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+
+                  <div className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden border bg-slate-900/90 flex items-center justify-center z-10 transition-transform duration-500 group-hover:scale-110 shadow-xl ${config.borderClass}`}>
+                    <ClientImage
+                      src={listing.frame.thumbnailUrl || listing.frame.imageUrl}
+                      alt={listing.frame.name}
+                      fill
+                      className="object-cover drop-shadow-2xl"
+                      sizes="(max-width: 640px) 96px, 112px"
+                      unoptimized
+                    />
+                  </div>
+
+                  <div className="relative w-full flex justify-center z-20 mt-1 h-6">
+                    {config.badge}
+                  </div>
+
+                  <div className="mt-auto w-full z-10 pt-2 border-t border-slate-800/40 flex flex-col items-center">
+                    <span className={`block text-xs sm:text-sm text-center px-1 truncate w-full drop-shadow-md ${config.textClass}`}>
+                      {listing.frame.name}
+                    </span>
+                    <div className="flex items-center gap-1 text-[9px] text-slate-500 mt-0.5 truncate max-w-full">
+                      <User className="w-2.5 h-2.5 shrink-0" />
+                      <span className="truncate">{listing.seller.name}</span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* SCROLL INFINITO */}
+          {loadingMore && (
+            <LoadingMore text="Carregando mais ofertas..." />
+          )}
+
+          {hasMore && !loading && !loadingMore && (
+            <div ref={loadMoreRef} className="h-10" />
+          )}
+
+          {!hasMore && listings.length > 0 && (
+            <div className="text-center py-8 text-sm text-slate-500 border-t border-slate-800/40 mt-8">
+              <p>Você viu todas as {listings.length} ofertas!</p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
