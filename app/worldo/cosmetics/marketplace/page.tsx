@@ -57,7 +57,7 @@ export default function MarketplacePage() {
 
       if (rarityFilter !== 'all') url.searchParams.set('rarity', rarityFilter);
       url.searchParams.set('sort', sort);
-      url.searchParams.set('limit', '50');
+      url.searchParams.set('limit', '56');
       url.searchParams.set('page', page.toString());
 
       if (searchTerm) {
