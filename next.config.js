@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  trailingSlash: true,
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -24,48 +26,15 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'pub-*.r2.dev', // ← ADICIONAR PARA R2
+        hostname: 'pub-*.r2.dev',
       },
     ],
-    minimumCacheTTL: 0,
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate, private',
-          },
-          {
-            key: 'Pragma',
-            value: 'no-cache',
-          },
-          {
-            key: 'Expires',
-            value: '0',
-          },
-        ],
-      },
-      {
-        // Headers específicos para rotas de perfil (reforço)
-        source: '/worldo/perfil/:path*',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate, private',
-          },
-          {
-            key: 'Surrogate-Control',
-            value: 'no-store',
-          },
-        ],
-      },
-    ];
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
 };
 

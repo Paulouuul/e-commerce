@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // VALIDAÇÃO DE SENHA (IGUAL AO PYTHON - MESMA LÓGICA)
+    // VALIDAÇÃO DE SENHA
     const validatePassword = (pass: string) => {
       const errors = [];
       if (pass.length < MIN_PASSWORD_LENGTH) {
