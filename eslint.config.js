@@ -7,12 +7,16 @@ import globals from 'globals';
 
 export default [
   {
+    // Ignorar pastas de build e arquivos gerados automaticamente
     ignores: [
       '**/.next/**',
       'node_modules/**',
       'out/**',
       'dist/**',
       'coverage/**',
+      '**/android/**',
+      '**/ios/**',
+      '**/public/**',   
       'next-env.d.ts',
       '**/*.config.js',
       'prisma/migrations/**',
@@ -40,14 +44,12 @@ export default [
     },
     plugins: {
       '@typescript-eslint': typescriptPlugin,
-      '@next/next': {
-        rules: nextPlugin.rules,
-      },
+      '@next/next': nextPlugin,
     },
     rules: {
+      ...typescriptPlugin.configs.recommended.rules,
       ...nextPlugin.configs.recommended.rules,
       ...nextPlugin.configs['core-web-vitals'].rules,
-
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
