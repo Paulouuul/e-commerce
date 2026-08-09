@@ -1,27 +1,23 @@
 // app/worldo/cosmetics/seller/[user_identifier]/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ClientImage } from '@/components/ClientImage';
 import { AvatarWithFrame } from '@/components/AvatarWithFrame';
-import { getRarityDesigns, RARITY, Rarity } from '@/constants/cosmeticRarity';
-import { formatItemCount } from '@/lib/format-utils';
+import { RARITY, Rarity } from '@/constants/cosmeticRarity';
 import {
   ArrowLeft,
-  Coins,
-  User,
   Package,
   Store,
   Search,
   X,
   Sparkles,
   Calendar,
-  Loader2,
 } from 'lucide-react';
 import { LoadingSpinner } from '@/components/Loading';
+import { MarketplaceVirtualized } from '@/components/MarketplaceVirtualized';
 
 interface SellerData {
   id: string;
@@ -77,8 +73,6 @@ interface ApiResponse {
   sellerId: string;
 }
 
-const rarityDesigns = getRarityDesigns('bottom-2');
-
 export default function SellerPage() {
   const { data: session } = useSession();
   const params = useParams();
@@ -88,36 +82,37 @@ export default function SellerPage() {
   const [listings, setListings] = useState<ListingData[]>([]);
   const [ownedItems, setOwnedItems] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [rarityFilter, setRarityFilter] = useState<'all' | Rarity>('all');
   const [sort, setSort] = useState('newest');
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [totalItems, setTotalItems] = useState(0);
 
   const rarityOptions = ['all', RARITY.COMUM, RARITY.RARO, RARITY.EPICO, RARITY.LENDARIO];
-  const ITEMS_PER_PAGE = 24;
+  const ITEMS_PER_PAGE = 56;
 
-  useEffect(() => {
-    if (!userIdentifier) return;
-
-    const fetchSellerData = async () => {
-      setLoading(true);
-      setError('');
+  const fetchListings = useCallback(
+    async (page: number, isLoadMore = false) => {
+      if (!userIdentifier) return;
 
       try {
+        if (isLoadMore) {
+          setLoadingMore(true);
+        } else {
+          setLoading(true);
+        }
+
         const url = new URL(`/api/cosmetics/seller/${userIdentifier}`, window.location.origin);
 
         if (rarityFilter !== 'all') url.searchParams.set('rarity', rarityFilter);
         url.searchParams.set('sort', sort);
         url.searchParams.set('page', page.toString());
         url.searchParams.set('limit', ITEMS_PER_PAGE.toString());
-
-        if (searchTerm) {
-          url.searchParams.set('search', searchTerm);
-        }
+        if (searchTerm) url.searchParams.set('search', searchTerm);
 
         const res = await fetch(url.toString());
 
@@ -128,47 +123,68 @@ export default function SellerPage() {
             setError('Erro ao carregar dados do vendedor');
           }
           setLoading(false);
+          setLoadingMore(false);
           return;
         }
 
         const data: ApiResponse = await res.json();
-        setSeller(data.seller);
-        setListings(data.listings);
-        setOwnedItems(data.ownedFrameIds || []);
-        setTotalPages(data.totalPages);
-        setTotalItems(data.total);
+
+        if (!isLoadMore) {
+          setSeller(data.seller);
+          setOwnedItems(data.ownedFrameIds || []);
+          setTotalItems(data.total || 0);
+        }
+
+        if (isLoadMore) {
+          setListings((prev) => {
+            const existingIds = new Set(prev.map((item) => item.id));
+            const newItems = (data.listings || []).filter(
+              (item: ListingData) => !existingIds.has(item.id)
+            );
+            return [...prev, ...newItems];
+          });
+        } else {
+          setListings(data.listings || []);
+        }
+
+        const totalPages = data.totalPages || 1;
+        setCurrentPage(page);
+        setHasMore(page < totalPages);
+        
       } catch (err) {
         console.error('Erro ao carregar dados do vendedor:', err);
-        setError('Erro ao conectar com o servidor');
+        if (!isLoadMore) {
+          setError('Erro ao conectar com o servidor');
+        }
       } finally {
         setLoading(false);
+        setLoadingMore(false);
       }
-    };
+    },
+    [userIdentifier, rarityFilter, sort, searchTerm]
+  );
 
-    fetchSellerData();
-  }, [userIdentifier, rarityFilter, sort, searchTerm, page]);
+  const loadMore = useCallback(async () => {
+    if (!hasMore || loading || loadingMore) return;
+    await fetchListings(currentPage + 1, true);
+  }, [hasMore, loading, loadingMore, currentPage, fetchListings]);
 
-  // Resetar página quando filtros mudarem
   useEffect(() => {
-    setPage(1);
-  }, [rarityFilter, sort, searchTerm]);
+    if (!userIdentifier) return;
+    
+    setListings([]);
+    setCurrentPage(1);
+    setHasMore(true);
+    fetchListings(1, false);
+  }, [userIdentifier, rarityFilter, sort, searchTerm, fetchListings]);
 
   const handleSearch = () => {
     setSearchTerm(searchInput);
-    setPage(1);
   };
 
   const clearSearch = () => {
     setSearchInput('');
     setSearchTerm('');
-    setPage(1);
-  };
-
-  const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setPage(newPage);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
   };
 
   if (loading && !seller) {
@@ -202,9 +218,10 @@ export default function SellerPage() {
   const isOwnStore = session?.user?.publicId === seller.id;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 sm:py-12">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-1 sm:gap-2 text-xs font-bold text-slate-500 mb-4 sm:mb-6 uppercase tracking-wider">
+    // ✅ AGORA IGUAL AO MARKETPLACECLIENT
+    <div className="max-w-7xl mx-auto px-4 pt-4 sm:pt-6 flex flex-col h-screen overflow-hidden">
+      {/* Breadcrumb - com espaçamento reduzido */}
+      <div className="flex items-center gap-1 sm:gap-2 text-xs font-bold text-slate-500 mb-4 sm:mb-6 uppercase tracking-wider shrink-0">
         <Link
           href="/worldo/cosmetics/marketplace"
           className="hover:text-purple-400 transition flex items-center gap-1 shrink-0"
@@ -221,8 +238,8 @@ export default function SellerPage() {
         </span>
       </div>
 
-      {/* Perfil do Vendedor */}
-      <div className="bg-slate-900/50 border border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+      {/* Perfil do Vendedor - com espaçamento reduzido */}
+      <div className="bg-slate-900/50 border border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 mb-4 sm:mb-6 backdrop-blur-xl shadow-2xl relative overflow-hidden shrink-0">
         <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-600/10 rounded-full blur-[100px] pointer-events-none" />
 
@@ -272,8 +289,8 @@ export default function SellerPage() {
         </div>
       </div>
 
-      {/* Filtros - mesmo estilo do marketplace/inventário */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      {/* Filtros - com espaçamento reduzido */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-4 shrink-0">
         <div className="flex-1 relative">
           <button
             onClick={handleSearch}
@@ -316,8 +333,8 @@ export default function SellerPage() {
         </div>
       </div>
 
-      {/* Ordenação - mesmo estilo do marketplace */}
-      <div className="flex items-center gap-2 mb-6">
+      {/* Ordenação - com espaçamento reduzido */}
+      <div className="flex items-center gap-2 mb-4 flex-wrap shrink-0">
         <span className="text-xs text-slate-500 font-medium mr-2">Ordenar por:</span>
         <button
           onClick={() => setSort('newest')}
@@ -361,158 +378,17 @@ export default function SellerPage() {
         </button>
       </div>
 
-      {/* Grid de Itens */}
-      {loading && listings.length === 0 ? (
-        <div className="flex justify-center items-center py-20">
-          <Loader2 className="w-10 h-10 text-purple-500 animate-spin" />
-        </div>
-      ) : listings.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 px-4 text-center bg-slate-900/20 border border-slate-800/50 rounded-2xl border-dashed">
-          <Package className="w-16 h-16 text-slate-700 mb-4 animate-pulse" />
-          <h3 className="text-lg sm:text-xl font-bold text-slate-300 mb-2">Nenhum item à venda</h3>
-          <p className="text-sm text-slate-500 max-w-md">
-            {searchTerm || rarityFilter !== 'all'
-              ? 'Nenhum item encontrado com os filtros aplicados.'
-              : `${seller.name} não tem nenhum item à venda no momento.`}
-          </p>
-          {(searchTerm || rarityFilter !== 'all') && (
-            <button
-              onClick={() => {
-                setSearchInput('');
-                setSearchTerm('');
-                setRarityFilter('all');
-              }}
-              className="mt-4 text-purple-400 hover:text-purple-300 text-sm font-bold underline-offset-2 underline transition"
-            >
-              Limpar filtros
-            </button>
-          )}
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-2 min-[480px]:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 sm:gap-6">
-            {listings.map((listing) => {
-              const isOwned = ownedItems.includes(listing.frame.id);
-              const config =
-                rarityDesigns[listing.frame.rarity?.toUpperCase()] || rarityDesigns.COMUM;
-
-              return (
-                <Link
-                  key={listing.id}
-                  href={`/worldo/cosmetics/marketplace/${listing.id}`}
-                  className={`group relative flex flex-col items-center justify-between p-3 sm:p-4 h-62.5 sm:h-67.5 rounded-2xl border overflow-hidden transition-all duration-300 ease-out cursor-pointer hover:-translate-y-2 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-purple-500/50 ${config.cardClass}`}
-                >
-                  {config.bgDecoration}
-                  <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-size-[0.4rem_0.4rem] opacity-[0.05]" />
-
-                  <div className="w-full flex justify-between items-start z-20 mb-2 gap-2">
-                    <span className="flex items-center gap-1 text-[10px] font-black text-amber-400 bg-amber-950/90 border border-amber-500/40 px-2 py-1 rounded-md shadow-[0_0_10px_rgba(245,158,11,0.2)] tracking-wider backdrop-blur-sm">
-                      <Coins className="w-3 h-3" /> {formatItemCount(listing.priceCoins)}
-                    </span>
-
-                    {isOwned ? (
-                      <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 font-black text-[9px] px-1.5 py-1 rounded-md shadow-lg backdrop-blur-md flex items-center uppercase shrink-0">
-                        ✓ Adquirido
-                      </span>
-                    ) : (
-                      <span className="bg-slate-950/90 backdrop-blur-md border border-slate-700/80 text-slate-200 font-black text-[10px] px-2 py-1 rounded-md shadow-lg shrink-0">
-                        x{formatItemCount(listing.quantity)}
-                      </span>
-                    )}
-                  </div>
-
-                  <div
-                    className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden border bg-slate-900/90 flex items-center justify-center z-10 transition-transform duration-500 group-hover:scale-110 shadow-xl ${config.borderClass}`}
-                  >
-                    <ClientImage
-                      src={listing.frame.thumbnailUrl || listing.frame.imageUrl}
-                      alt={listing.frame.name}
-                      fill
-                      className="object-cover drop-shadow-2xl"
-                      sizes="(max-width: 640px) 96px, 112px"
-                      unoptimized
-                    />
-                  </div>
-
-                  <div className="relative w-full flex justify-center z-20 mt-1 h-6">
-                    {config.badge}
-                  </div>
-
-                  <div className="mt-auto w-full z-10 pt-2 border-t border-slate-800/40 flex flex-col items-center">
-                    <span
-                      className={`block text-xs sm:text-sm text-center px-1 truncate w-full drop-shadow-md ${config.textClass}`}
-                      title={listing.frame.name}
-                    >
-                      {listing.frame.name}
-                    </span>
-                    <div className="flex items-center gap-1 text-[9px] text-slate-500 mt-0.5 truncate max-w-full">
-                      <User className="w-2.5 h-2.5 shrink-0" />
-                      <span className="truncate">{listing.seller.name}</span>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* Paginação */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-10">
-              <button
-                onClick={() => handlePageChange(page - 1)}
-                disabled={page === 1}
-                className="px-4 py-2 rounded-xl bg-slate-900/50 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-slate-400 disabled:hover:border-slate-800"
-              >
-                Anterior
-              </button>
-
-              <div className="flex items-center gap-1.5">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum: number;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (page <= 3) {
-                    pageNum = i + 1;
-                  } else if (page >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = page - 2 + i;
-                  }
-
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => handlePageChange(pageNum)}
-                      className={`w-10 h-10 rounded-xl font-bold text-sm transition ${
-                        page === pageNum
-                          ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/30'
-                          : 'bg-slate-900/50 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800 hover:border-slate-600'
-                      }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                onClick={() => handlePageChange(page + 1)}
-                disabled={page === totalPages}
-                className="px-4 py-2 rounded-xl bg-slate-900/50 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-600 transition disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-slate-400 disabled:hover:border-slate-800"
-              >
-                Próxima
-              </button>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Contador de resultados */}
-      {!loading && listings.length > 0 && (
-        <p className="text-center text-xs text-slate-500 mt-4">
-          Mostrando {listings.length} de {totalItems} {totalItems === 1 ? 'item' : 'itens'}
-        </p>
-      )}
+      {/* Componente Virtualizado */}
+      <div className="flex-1 min-h-0">
+        <MarketplaceVirtualized
+          listings={listings}
+          ownedItems={ownedItems}
+          loading={loading || loadingMore}
+          hasMore={hasMore}
+          onLoadMore={loadMore}
+          totalItems={totalItems}
+        />
+      </div>
     </div>
   );
 }

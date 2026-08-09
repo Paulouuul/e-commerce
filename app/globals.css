@@ -490,3 +490,14 @@ video::-webkit-media-controls-panel {
 * {
   -webkit-tap-highlight-color: transparent;
 }
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+}
