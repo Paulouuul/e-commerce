@@ -416,9 +416,7 @@ export default function MyCosmeticsPage() {
               })}
             </div>
 
-            {loadingMore && (
-              <LoadingMore text="Carregando mais items..." />
-            )}
+            {loadingMore && <LoadingMore text="Carregando mais items..." />}
 
             {hasMore && !loading && !loadingMore && <div ref={loadMoreRef} className="h-10" />}
           </>

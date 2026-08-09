@@ -40,52 +40,54 @@ export default function MarketplacePage() {
   const [sort, setSort] = useState('newest');
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  
+
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const rarityOptions = ['all', RARITY.COMUM, RARITY.RARO, RARITY.EPICO, RARITY.LENDARIO];
 
   // Função para carregar listings com PAGINAÇÃO
-  const fetchListings = useCallback(async (page: number, isLoadMore = false) => {
-    try {
-      if (isLoadMore) {
-        setLoadingMore(true);
-      } else {
-        setLoading(true);
+  const fetchListings = useCallback(
+    async (page: number, isLoadMore = false) => {
+      try {
+        if (isLoadMore) {
+          setLoadingMore(true);
+        } else {
+          setLoading(true);
+        }
+
+        const url = new URL('/api/cosmetics/marketplace', window.location.origin);
+
+        if (rarityFilter !== 'all') url.searchParams.set('rarity', rarityFilter);
+        url.searchParams.set('sort', sort);
+        url.searchParams.set('limit', '56');
+        url.searchParams.set('page', page.toString());
+
+        if (searchTerm) {
+          url.searchParams.set('search', searchTerm);
+        }
+
+        const res = await fetch(url.toString());
+        const data = await res.json();
+
+        if (isLoadMore) {
+          setListings((prev) => [...prev, ...data.listings]);
+        } else {
+          setListings(data.listings || []);
+          setOwnedItems(data.ownedFrameIds || []);
+        }
+
+        // Usando totalPages para calcular hasMore
+        const totalPages = data.totalPages || 1;
+        setCurrentPage(page);
+        setHasMore(page < totalPages);
+      } catch (err) {
+        console.error('Erro ao carregar marketplace:', err);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
       }
-
-      const url = new URL('/api/cosmetics/marketplace', window.location.origin);
-
-      if (rarityFilter !== 'all') url.searchParams.set('rarity', rarityFilter);
-      url.searchParams.set('sort', sort);
-      url.searchParams.set('limit', '56');
-      url.searchParams.set('page', page.toString());
-
-      if (searchTerm) {
-        url.searchParams.set('search', searchTerm);
-      }
-
-      const res = await fetch(url.toString());
-      const data = await res.json();
-
-      if (isLoadMore) {
-        setListings(prev => [...prev, ...data.listings]);
-      } else {
-        setListings(data.listings || []);
-        setOwnedItems(data.ownedFrameIds || []);
-      }
-
-      // Usando totalPages para calcular hasMore
-      const totalPages = data.totalPages || 1;
-      setCurrentPage(page);
-      setHasMore(page < totalPages);
-      
-    } catch (err) {
-      console.error('Erro ao carregar marketplace:', err);
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  }, [rarityFilter, sort, searchTerm]);
+    },
+    [rarityFilter, sort, searchTerm],
+  );
 
   // Load inicial com debounce
   useEffect(() => {
@@ -109,10 +111,10 @@ export default function MarketplacePage() {
           fetchListings(currentPage + 1, true);
         }
       },
-      { 
+      {
         threshold: 0.1,
-        rootMargin: '100px'
-      }
+        rootMargin: '100px',
+      },
     );
 
     if (loadMoreRef.current) {
@@ -144,9 +146,7 @@ export default function MarketplacePage() {
             Adquira cosméticos exclusivos de outros usuários
           </p>
           {listings.length > 0 && (
-            <p className="text-xs text-slate-500 mt-1">
-              {listings.length} ofertas encontradas
-            </p>
+            <p className="text-xs text-slate-500 mt-1">{listings.length} ofertas encontradas</p>
           )}
         </div>
         {session && (
@@ -265,7 +265,8 @@ export default function MarketplacePage() {
           <div className="grid grid-cols-2 min-[480px]:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-4 sm:gap-6">
             {listings.map((listing) => {
               const isOwned = ownedItems.includes(listing.frame.id);
-              const config = rarityDesigns[listing.frame.rarity?.toUpperCase()] || rarityDesigns.COMUM;
+              const config =
+                rarityDesigns[listing.frame.rarity?.toUpperCase()] || rarityDesigns.COMUM;
 
               return (
                 <Link
@@ -292,7 +293,9 @@ export default function MarketplacePage() {
                     )}
                   </div>
 
-                  <div className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden border bg-slate-900/90 flex items-center justify-center z-10 transition-transform duration-500 group-hover:scale-110 shadow-xl ${config.borderClass}`}>
+                  <div
+                    className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden border bg-slate-900/90 flex items-center justify-center z-10 transition-transform duration-500 group-hover:scale-110 shadow-xl ${config.borderClass}`}
+                  >
                     <ClientImage
                       src={listing.frame.thumbnailUrl || listing.frame.imageUrl}
                       alt={listing.frame.name}
@@ -308,7 +311,9 @@ export default function MarketplacePage() {
                   </div>
 
                   <div className="mt-auto w-full z-10 pt-2 border-t border-slate-800/40 flex flex-col items-center">
-                    <span className={`block text-xs sm:text-sm text-center px-1 truncate w-full drop-shadow-md ${config.textClass}`}>
+                    <span
+                      className={`block text-xs sm:text-sm text-center px-1 truncate w-full drop-shadow-md ${config.textClass}`}
+                    >
                       {listing.frame.name}
                     </span>
                     <div className="flex items-center gap-1 text-[9px] text-slate-500 mt-0.5 truncate max-w-full">
@@ -322,13 +327,9 @@ export default function MarketplacePage() {
           </div>
 
           {/* SCROLL INFINITO */}
-          {loadingMore && (
-            <LoadingMore text="Carregando mais ofertas..." />
-          )}
+          {loadingMore && <LoadingMore text="Carregando mais ofertas..." />}
 
-          {hasMore && !loading && !loadingMore && (
-            <div ref={loadMoreRef} className="h-10" />
-          )}
+          {hasMore && !loading && !loadingMore && <div ref={loadMoreRef} className="h-10" />}
 
           {!hasMore && listings.length > 0 && (
             <div className="text-center py-8 text-sm text-slate-500 border-t border-slate-800/40 mt-8">

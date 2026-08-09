@@ -12,9 +12,9 @@ async function seed10000Listings() {
     const seller = await prisma.users.findFirst({
       where: {
         listings: {
-          some: {} // Usuário que já tem listings
-        }
-      }
+          some: {}, // Usuário que já tem listings
+        },
+      },
     });
 
     if (!seller) {
@@ -52,11 +52,26 @@ async function seed10000Listings() {
     const listings = [];
     const rarities = ['COMUM', 'INCOMUM', 'RARA', 'EPICO', 'LENDARIO', 'MITICO'];
     const names = [
-      'Frame Solar', 'Frame Lunar', 'Frame Estelar', 'Frame Galáctico',
-      'Frame Nebuloso', 'Frame Cósmico', 'Frame Aurora', 'Frame Eclipse',
-      'Frame Supernova', 'Frame Quasar', 'Frame Pulsar', 'Frame Cometa',
-      'Frame Asteroide', 'Frame Planeta', 'Frame Estrela', 'Frame Universo',
-      'Frame Dimensional', 'Frame Temporal', 'Frame Espacial', 'Frame Divino'
+      'Frame Solar',
+      'Frame Lunar',
+      'Frame Estelar',
+      'Frame Galáctico',
+      'Frame Nebuloso',
+      'Frame Cósmico',
+      'Frame Aurora',
+      'Frame Eclipse',
+      'Frame Supernova',
+      'Frame Quasar',
+      'Frame Pulsar',
+      'Frame Cometa',
+      'Frame Asteroide',
+      'Frame Planeta',
+      'Frame Estrela',
+      'Frame Universo',
+      'Frame Dimensional',
+      'Frame Temporal',
+      'Frame Espacial',
+      'Frame Divino',
     ];
 
     for (let i = 0; i < 10000; i++) {
@@ -64,7 +79,7 @@ async function seed10000Listings() {
       const rarity = rarities[Math.floor(Math.random() * rarities.length)];
       const price = Math.floor(Math.random() * 10000) + 100;
       const quantity = Math.floor(Math.random() * 50) + 1;
-      
+
       listings.push({
         id: `seed_listing_${Date.now()}_${i}`,
         frameId: frame.id,
@@ -92,14 +107,14 @@ async function seed10000Listings() {
 
     // Inserir em bulk no Elasticsearch
     console.log('💾 Inserindo no Elasticsearch...');
-    
+
     const body = listings.flatMap((doc) => [
       { index: { _index: LISTINGS_INDEX, _id: doc.id } },
       doc,
     ]);
 
-    const response = await esClient.bulk({ 
-      body, 
+    const response = await esClient.bulk({
+      body,
       refresh: true,
       timeout: '60s',
     });
@@ -130,7 +145,6 @@ async function seed10000Listings() {
 
     console.log('========================================');
     console.log('Seed concluído!');
-
   } catch (error) {
     console.error('Erro:', error);
   }

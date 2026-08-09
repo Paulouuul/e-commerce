@@ -4,9 +4,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function proxy(req: NextRequest) {
-  const isSecure = 
-    req.nextUrl.protocol === 'https:' || 
-    req.headers.get('x-forwarded-proto') === 'https';
+  const isSecure =
+    req.nextUrl.protocol === 'https:' || req.headers.get('x-forwarded-proto') === 'https';
 
   const token = await getToken({
     req,
