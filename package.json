@@ -41,7 +41,7 @@
     "bcryptjs": "^3.0.3",
     "bootstrap-icons": "^1.13.1",
     "dotenv": "^17.4.2",
-    "lucide-react": "^1.30.0",
+    "lucide-react": "^1.31.0",
     "next": "^16.3.0",
     "next-auth": "^5.0.0-beta.32",
     "pg": "8.23.0",
@@ -78,7 +78,7 @@
     "prettier": "^3.9.6",
     "prisma": "^7.9.1",
     "tsx": "^4.23.11",
-    "typescript": "^5.8.3",
+    "typescript": "6.0.2",
     "typescript-eslint": "^8.66.0"
   },
   "description": "Social network full-stack com Next.js 16, Prisma 7, Stripe e Tailwind CSS",
