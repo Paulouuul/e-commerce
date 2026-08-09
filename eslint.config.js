@@ -16,7 +16,7 @@ export default [
       'coverage/**',
       '**/android/**',
       '**/ios/**',
-      '**/public/**',   
+      '**/public/**',
       'next-env.d.ts',
       '**/*.config.js',
       'prisma/migrations/**',
