@@ -151,7 +151,15 @@ export function InventoryVirtualized({
   }, [items, columns]);
 
   const estimateSize = (index: number) => {
-    return index === groupedItems.length ? 60 : 280; // Ajuste conforme altura real do card
+    // Altura do loader
+    if (index === groupedItems.length) return 60; 
+
+    // Calcula a altura baseado no tamanho da tela (h-48 = 192px | h-52 = 208px)
+    const isMobile = typeof window !== 'undefined' ? window.innerWidth < 640 : false;
+    const cardHeight = isMobile ? 192 : 208;
+    const verticalSpacing = 16; // Ajuste esse valor para aumentar/diminuir o gap vertical
+
+    return cardHeight + verticalSpacing;
   };
 
   const virtualCount = hasMore ? groupedItems.length + 1 : groupedItems.length;
