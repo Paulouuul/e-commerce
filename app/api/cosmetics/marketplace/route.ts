@@ -120,6 +120,7 @@ export async function GET(req: NextRequest) {
       typeof response.hits.total === 'number'
         ? response.hits.total
         : response.hits.total?.value || 0;
+    const hasMore = from + limit < total;
 
     // Mapear resultados para o formato esperado
     const listings = hits.map((hit: any) => ({
@@ -174,6 +175,7 @@ export async function GET(req: NextRequest) {
       total,
       page,
       totalPages: Math.ceil(total / limit),
+      hasMore,
       ownedFrameIds,
     });
   } catch (error) {

@@ -105,7 +105,6 @@ export function MarketplaceVirtualized({
   loading,
   hasMore,
   onLoadMore,
-  totalItems,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isLoadingRef = useRef(false);
@@ -137,7 +136,6 @@ export function MarketplaceVirtualized({
     return groups;
   }, [listings, columns]);
 
-  // ✅ CORRIGIDO: Reduzido tamanho do loader
   const estimateSize = (index: number) => {
     return index === groupedListings.length ? 60 : 306;
   };
@@ -146,7 +144,6 @@ export function MarketplaceVirtualized({
     ? groupedListings.length + 1
     : groupedListings.length;
 
-  // ✅ CORRIGIDO: Removido paddingStart e paddingEnd
   const rowVirtualizer = useVirtualizer({
     count: virtualCount,
     getScrollElement: () => containerRef.current,
@@ -246,9 +243,7 @@ export function MarketplaceVirtualized({
                 {hasMore ? (
                   <LoadingMore text="Carregando mais ofertas..." />
                 ) : (
-                  <div className="text-center py-4 text-sm text-slate-500">
-                    <p>Você viu todas as {totalItems} ofertas!</p>
-                  </div>
+                  null
                 )}
               </div>
             );

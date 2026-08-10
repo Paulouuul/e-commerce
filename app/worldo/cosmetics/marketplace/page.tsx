@@ -52,7 +52,6 @@ export default function MarketplacePage() {
       abortControllerRef.current = new AbortController();
 
       try {
-        // Se for load more, usamos o loadingMore para não disparar o loader global da tela
         if (isLoadMore) {
           setLoadingMore(true);
         } else {
@@ -90,9 +89,8 @@ export default function MarketplacePage() {
           setTotalItems(data.total || 0);
         }
 
-        const totalPages = data.totalPages || 1;
         setCurrentPage(page);
-        setHasMore(page < totalPages);
+        setHasMore(data.hasMore ?? false);
         
       } catch (err: any) {
         if (err.name === 'AbortError') {
@@ -110,7 +108,6 @@ export default function MarketplacePage() {
   );
 
   const loadMore = useCallback(async () => {
-    // Usamos o loadingMore aqui para bloquear chamadas duplas enquanto a página atual baixa
     if (!hasMore || loading || loadingMore) return;
     await fetchListings(currentPage + 1, true);
   }, [hasMore, loading, loadingMore, currentPage, fetchListings]);
