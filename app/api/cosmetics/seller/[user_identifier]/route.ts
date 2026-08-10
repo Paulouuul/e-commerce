@@ -13,7 +13,7 @@ export async function GET(
     const { searchParams } = new URL(request.url);
 
     // Parâmetros de filtro
-    const { user_identifier } = await params; // ← SEM await, params é síncrono no Next 16
+    const { user_identifier } = await params;
     const rarityParam = searchParams.get('rarity');
     const sort = searchParams.get('sort') || 'newest';
     const search = searchParams.get('search') || '';
@@ -180,6 +180,8 @@ export async function GET(
       ownedFrameIds = ownedItems.map((item) => item.frameId);
     }
 
+    const hasMore = from + limit < total;
+
     // Formatar resposta
     const formattedListings = listings.map((listing) => ({
       id: listing.id,
@@ -227,6 +229,7 @@ export async function GET(
       total,
       page,
       totalPages: Math.ceil(total / limit),
+      hasMore,
       ownedFrameIds,
       sellerId: seller.id,
     });
