@@ -167,7 +167,7 @@ export default function MyCosmeticsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8 pb-6 border-b border-slate-800/60 shrink-0">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-linear-to-r from-white via-slate-200 to-slate-400 tracking-wide flex items-center gap-3">
-            <Package className="w-7 h-7 sm:w-8 sm:h-8 text-purple-500 shrink-0" /> 
+            <Package className="w-7 h-7 sm:w-8 sm:h-8 text-purple-500 shrink-0" />
             MEUS COSMÉTICOS
           </h1>
           <p className="text-slate-400 text-xs sm:text-sm mt-1.5 font-medium">
@@ -235,8 +235,8 @@ export default function MyCosmeticsPage() {
         <button
           onClick={() => setActiveFilter('unlisted')}
           className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-[transform,border-color,background-color,box-shadow] ${
-            activeFilter === 'unlisted' 
-              ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/30' 
+            activeFilter === 'unlisted'
+              ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/30'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
           }`}
         >
@@ -248,8 +248,8 @@ export default function MyCosmeticsPage() {
         <button
           onClick={() => setActiveFilter('listed')}
           className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-[transform,border-color,background-color,box-shadow] ${
-            activeFilter === 'listed' 
-              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30' 
+            activeFilter === 'listed'
+              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/30'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
           }`}
         >
@@ -261,8 +261,8 @@ export default function MyCosmeticsPage() {
         <button
           onClick={() => setActiveFilter('all')}
           className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-[transform,border-color,background-color,box-shadow] ${
-            activeFilter === 'all' 
-              ? 'bg-slate-700 text-white shadow-lg shadow-slate-900/30' 
+            activeFilter === 'all'
+              ? 'bg-slate-700 text-white shadow-lg shadow-slate-900/30'
               : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
           }`}
         >

@@ -26,7 +26,7 @@ interface MarketplaceListing {
 
 export default function MarketplacePage() {
   const { data: session } = useSession();
-  
+
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [ownedItems, setOwnedItems] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +35,7 @@ export default function MarketplacePage() {
   const [searchInput, setSearchInput] = useState('');
   const [rarityFilter, setRarityFilter] = useState<'all' | Rarity>('all');
   const [sort, setSort] = useState('newest');
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [totalItems, setTotalItems] = useState(0);
@@ -72,14 +72,14 @@ export default function MarketplacePage() {
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
-        
+
         const data = await res.json();
 
         if (isLoadMore) {
           setListings((prev) => {
             const existingIds = new Set(prev.map((item) => item.id));
             const newItems = (data.listings || []).filter(
-              (item: MarketplaceListing) => !existingIds.has(item.id)
+              (item: MarketplaceListing) => !existingIds.has(item.id),
             );
             return [...prev, ...newItems];
           });
@@ -91,7 +91,6 @@ export default function MarketplacePage() {
 
         setCurrentPage(page);
         setHasMore(data.hasMore ?? false);
-        
       } catch (err: any) {
         if (err.name === 'AbortError') {
           return;
@@ -104,7 +103,7 @@ export default function MarketplacePage() {
         }
       }
     },
-    [rarityFilter, sort, searchTerm]
+    [rarityFilter, sort, searchTerm],
   );
 
   const loadMore = useCallback(async () => {
@@ -116,7 +115,7 @@ export default function MarketplacePage() {
     setListings([]);
     setCurrentPage(1);
     setHasMore(true);
-    
+
     fetchListings(1, false);
 
     return () => {

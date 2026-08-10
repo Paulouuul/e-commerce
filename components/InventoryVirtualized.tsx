@@ -54,9 +54,7 @@ const InventoryItem = ({
     <button
       onClick={() => onClick(item)}
       className={`group relative flex flex-col items-center justify-between p-2.5 sm:p-3 h-48 sm:h-52 rounded-2xl border overflow-hidden transition-all duration-300 ease-out cursor-pointer hover:-translate-y-1.5 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-purple-500/50 ${config.cardClass} ${
-        item.isListed
-          ? 'ring-1 ring-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.08)]'
-          : ''
+        item.isListed ? 'ring-1 ring-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.08)]' : ''
       }`}
     >
       {/* Efeitos de fundo da Raridade */}
@@ -102,9 +100,7 @@ const InventoryItem = ({
       </div>
 
       {/* Badge de Raridade */}
-      <div className="relative w-full flex justify-center z-20 mt-1 mb-2 h-6">
-        {config.badge}
-      </div>
+      <div className="relative w-full flex justify-center z-20 mt-1 mb-2 h-6">{config.badge}</div>
 
       {/* Nome do Item */}
       <div className="w-full z-10 pt-1.5 border-t border-slate-800/40 flex flex-col items-center">

@@ -7,15 +7,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { AvatarWithFrame } from '@/components/AvatarWithFrame';
 import { RARITY, Rarity } from '@/constants/cosmeticRarity';
-import {
-  ArrowLeft,
-  Package,
-  Store,
-  Search,
-  X,
-  Sparkles,
-  Calendar,
-} from 'lucide-react';
+import { ArrowLeft, Package, Store, Search, X, Sparkles, Calendar } from 'lucide-react';
 import { LoadingSpinner } from '@/components/Loading';
 import { MarketplaceVirtualized } from '@/components/MarketplaceVirtualized';
 
@@ -140,7 +132,7 @@ export default function SellerPage() {
           setListings((prev) => {
             const existingIds = new Set(prev.map((item) => item.id));
             const newItems = (data.listings || []).filter(
-              (item: ListingData) => !existingIds.has(item.id)
+              (item: ListingData) => !existingIds.has(item.id),
             );
             return [...prev, ...newItems];
           });
@@ -150,7 +142,6 @@ export default function SellerPage() {
 
         setCurrentPage(page);
         setHasMore(data.hasMore ?? false);
-        
       } catch (err) {
         console.error('Erro ao carregar dados do vendedor:', err);
         if (!isLoadMore) {
@@ -161,7 +152,7 @@ export default function SellerPage() {
         setLoadingMore(false);
       }
     },
-    [userIdentifier, rarityFilter, sort, searchTerm]
+    [userIdentifier, rarityFilter, sort, searchTerm],
   );
 
   const loadMore = useCallback(async () => {
@@ -171,7 +162,7 @@ export default function SellerPage() {
 
   useEffect(() => {
     if (!userIdentifier) return;
-    
+
     setListings([]);
     setCurrentPage(1);
     setHasMore(true);

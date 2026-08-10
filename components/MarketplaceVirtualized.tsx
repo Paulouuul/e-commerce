@@ -140,9 +140,7 @@ export function MarketplaceVirtualized({
     return index === groupedListings.length ? 60 : 306;
   };
 
-  const virtualCount = hasMore
-    ? groupedListings.length + 1
-    : groupedListings.length;
+  const virtualCount = hasMore ? groupedListings.length + 1 : groupedListings.length;
 
   const rowVirtualizer = useVirtualizer({
     count: virtualCount,
@@ -168,14 +166,7 @@ export function MarketplaceVirtualized({
       isLoadingRef.current = true;
       onLoadMore();
     }
-  }, [
-    lastItemIndex,
-    groupedListings.length,
-    hasMore,
-    loading,
-    onLoadMore,
-    listings.length,
-  ]);
+  }, [lastItemIndex, groupedListings.length, hasMore, loading, onLoadMore, listings.length]);
 
   useEffect(() => {
     if (!loading) {
@@ -240,11 +231,7 @@ export function MarketplaceVirtualized({
                   justifyContent: 'center',
                 }}
               >
-                {hasMore ? (
-                  <LoadingMore text="Carregando mais ofertas..." />
-                ) : (
-                  null
-                )}
+                {hasMore ? <LoadingMore text="Carregando mais ofertas..." /> : null}
               </div>
             );
           }
