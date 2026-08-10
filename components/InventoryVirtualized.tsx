@@ -36,7 +36,6 @@ interface Props {
   hasMore: boolean;
   onLoadMore: () => void;
   onItemClick: (item: GroupedItem) => void;
-  totalItems: number;
 }
 
 const rarityDesigns = getRarityDesigns('bottom-2');
@@ -121,7 +120,6 @@ export function InventoryVirtualized({
   hasMore,
   onLoadMore,
   onItemClick,
-  totalItems,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isLoadingRef = useRef(false);
@@ -257,13 +255,7 @@ export function InventoryVirtualized({
                   justifyContent: 'center',
                 }}
               >
-                {hasMore ? (
-                  <LoadingMore text="Carregando mais itens..." />
-                ) : (
-                  <div className="text-center py-4 text-sm text-slate-500">
-                    <p>Total de {totalItems} itens no inventário</p>
-                  </div>
-                )}
+                {hasMore ? <LoadingMore text="Carregando mais itens..." /> : null}
               </div>
             );
           }

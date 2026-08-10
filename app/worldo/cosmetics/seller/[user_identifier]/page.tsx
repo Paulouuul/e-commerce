@@ -376,7 +376,6 @@ export default function SellerPage() {
           loading={loading || loadingMore}
           hasMore={hasMore}
           onLoadMore={loadMore}
-          totalItems={totalItems}
         />
       </div>
     </div>

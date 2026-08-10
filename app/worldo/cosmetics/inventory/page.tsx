@@ -88,7 +88,7 @@ export default function MyCosmeticsPage() {
           setItems(data.items);
         }
 
-        setHasMore(data.pagination.hasNextPage);
+        setHasMore(data.hasMore ?? false);
         setCurrentPage(page);
       } catch (err) {
         console.error('Erro ao processar inventário:', err);
@@ -307,7 +307,6 @@ export default function MyCosmeticsPage() {
           hasMore={hasMore}
           onLoadMore={loadMore}
           onItemClick={handleOpenItem}
-          totalItems={statsData.all}
         />
       </div>
 

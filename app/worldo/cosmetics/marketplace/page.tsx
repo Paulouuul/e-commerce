@@ -38,7 +38,7 @@ export default function MarketplacePage() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const [totalItems, setTotalItems] = useState(0);
+  const [, setTotalItems] = useState(0);
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -227,7 +227,6 @@ export default function MarketplacePage() {
           loading={loading || loadingMore}
           hasMore={hasMore}
           onLoadMore={loadMore}
-          totalItems={totalItems}
         />
       </div>
     </div>

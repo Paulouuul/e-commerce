@@ -32,7 +32,6 @@ interface Props {
   loading: boolean;
   hasMore: boolean;
   onLoadMore: () => void;
-  totalItems: number;
 }
 
 const rarityDesigns = getRarityDesigns('bottom-2');
