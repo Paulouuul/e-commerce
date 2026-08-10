@@ -69,6 +69,7 @@ interface ApiResponse {
   total: number;
   page: number;
   totalPages: number;
+  hasMore: boolean;
   ownedFrameIds: string[];
   sellerId: string;
 }
@@ -147,9 +148,8 @@ export default function SellerPage() {
           setListings(data.listings || []);
         }
 
-        const totalPages = data.totalPages || 1;
         setCurrentPage(page);
-        setHasMore(page < totalPages);
+        setHasMore(data.hasMore ?? false);
         
       } catch (err) {
         console.error('Erro ao carregar dados do vendedor:', err);
@@ -218,9 +218,8 @@ export default function SellerPage() {
   const isOwnStore = session?.user?.publicId === seller.id;
 
   return (
-    // ✅ AGORA IGUAL AO MARKETPLACECLIENT
     <div className="max-w-7xl mx-auto px-4 pt-4 sm:pt-6 flex flex-col h-screen overflow-hidden">
-      {/* Breadcrumb - com espaçamento reduzido */}
+      {/* Breadcrumb */}
       <div className="flex items-center gap-1 sm:gap-2 text-xs font-bold text-slate-500 mb-4 sm:mb-6 uppercase tracking-wider shrink-0">
         <Link
           href="/worldo/cosmetics/marketplace"
@@ -238,7 +237,7 @@ export default function SellerPage() {
         </span>
       </div>
 
-      {/* Perfil do Vendedor - com espaçamento reduzido */}
+      {/* Perfil do Vendedor */}
       <div className="bg-slate-900/50 border border-slate-800 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 mb-4 sm:mb-6 backdrop-blur-xl shadow-2xl relative overflow-hidden shrink-0">
         <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-600/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-600/10 rounded-full blur-[100px] pointer-events-none" />
@@ -289,7 +288,7 @@ export default function SellerPage() {
         </div>
       </div>
 
-      {/* Filtros - com espaçamento reduzido */}
+      {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-4 mb-4 shrink-0">
         <div className="flex-1 relative">
           <button
@@ -333,7 +332,7 @@ export default function SellerPage() {
         </div>
       </div>
 
-      {/* Ordenação - com espaçamento reduzido */}
+      {/* Ordenação */}
       <div className="flex items-center gap-2 mb-4 flex-wrap shrink-0">
         <span className="text-xs text-slate-500 font-medium mr-2">Ordenar por:</span>
         <button
