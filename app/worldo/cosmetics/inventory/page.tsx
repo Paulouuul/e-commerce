@@ -76,7 +76,7 @@ export default function MyCosmeticsPage() {
         }
 
         const res = await fetch(
-          `/api/cosmetics/inventory/grouped?page=${page}&limit=16&filter=${activeFilter}&search=${encodeURIComponent(searchTerm)}&rarity=${rarityFilter}&sort=${sort}`,
+          `/api/cosmetics/inventory/grouped?page=${page}&limit=56&filter=${activeFilter}&search=${encodeURIComponent(searchTerm)}&rarity=${rarityFilter}&sort=${sort}`,
         );
         if (!res.ok) throw new Error('Falha ao sincronizar inventário');
 
