@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { ClientImage } from '@/components/ClientImage';
 import { backendApiCall } from '@/lib/backendApiClient';
+import { FeedbackMessage } from '@/components/FeedbackMessage';
 
 import {
   Sparkles,
@@ -361,16 +362,17 @@ export default function EditProfilePage() {
 
         {/* Alertas */}
         {error && (
-          <div className="bg-red-500/10 text-red-400 p-3 rounded-xl mb-6 text-xs border border-red-500/20 flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span className="leading-relaxed">{error}</span>
-          </div>
+          <FeedbackMessage 
+    type="error" 
+    message={error} 
+  />
         )}
 
         {success && (
-          <div className="bg-emerald-500/10 text-emerald-400 p-3 rounded-xl mb-6 text-xs border border-emerald-500/20 flex items-center gap-2">
-            <span className="leading-relaxed">{success}</span>
-          </div>
+          <FeedbackMessage 
+    type="success" 
+    message={success} 
+  />
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">

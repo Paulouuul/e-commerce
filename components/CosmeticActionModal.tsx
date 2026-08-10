@@ -7,6 +7,7 @@ import { AvatarWithFrame } from '@/components/AvatarWithFrame';
 import { PlatformFeeTooltipIcon } from '@/components/PlatformFeeTooltipIcon';
 import { getRarityDesigns, RARITY, Rarity } from '@/constants/cosmeticRarity';
 import { formatFullNumber, formatPrice } from '@/lib/format-utils';
+import { FeedbackMessage } from '@/components/FeedbackMessage';
 
 import {
   Tag,
@@ -359,14 +360,18 @@ export function CosmeticActionModal({
         <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5">
           {/* MENSAGENS DE FEEDBACK */}
           {errorMessage && (
-            <div className="bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl p-3 text-xs flex items-start gap-2">
-              <span>{errorMessage}</span>
-            </div>
+            <FeedbackMessage 
+    type="error" 
+    message={errorMessage}
+    align="start"
+  />
           )}
           {successMessage && (
-            <div className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl p-3 text-xs flex items-start gap-2">
-              <span>{successMessage}</span>
-            </div>
+            <FeedbackMessage 
+    type="success" 
+    message={successMessage}
+    align="start"
+  />
           )}
 
           {/* IMAGEM E INFOS BASE */}
