@@ -152,7 +152,7 @@ export function InventoryVirtualized({
 
   const estimateSize = (index: number) => {
     // Altura do loader
-    if (index === groupedItems.length) return 60; 
+    if (index === groupedItems.length) return 60;
 
     // Calcula a altura baseado no tamanho da tela (h-48 = 192px | h-52 = 208px)
     const isMobile = typeof window !== 'undefined' ? window.innerWidth < 640 : false;
