@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
         frame: true,
       },
       orderBy: {
-        updatedAt: 'desc', // Ordenar por atualização mais recente
+        updatedAt: 'desc',
       },
     });
 
@@ -42,14 +42,11 @@ export async function GET(request: NextRequest) {
 
     items.forEach((item) => {
       const listingId = item.isListed ? item.listingId : null;
-      // const key = `${item.frameId}-${item.isListed}`
 
       let key;
       if (item.isListed && item.listingId) {
-        // Itens listados: agrupa pelo listingId (cada anúncio é um grupo separado)
         key = `listed-${item.listingId}`;
       } else {
-        // Itens não listados: agrupa pelo frameId
         key = `unlisted-${item.frameId}`;
       }
 
@@ -74,12 +71,9 @@ export async function GET(request: NextRequest) {
         group.isEquipped = true;
         group.equippedItemId = item.id;
       }
-      // Atualizar a data mais recente se este item for mais novo
       if (item.updatedAt > group.lastActivityAt) {
         group.lastActivityAt = item.updatedAt;
       }
-
-      // Manter o menor preço
       if (item.resalePrice && (!group.resalePrice || item.resalePrice < group.resalePrice)) {
         group.resalePrice = item.resalePrice;
       }
@@ -96,22 +90,19 @@ export async function GET(request: NextRequest) {
     }
 
     if (rarity && rarity !== 'all') {
-      // Verificar se é um valor válido do enum
       const validRarities = Object.values(Rarity);
       if (validRarities.includes(rarity as Rarity)) {
         allGroupedItems = allGroupedItems.filter((item) => item.frame.rarity === rarity);
       }
     }
 
-    // Ordenar pela data mais recente (já vem ordenado pela query)
+    // Ordenar pela data mais recente
     allGroupedItems.sort((a, b) => {
       if (sort === 'oldest') {
-        // Mais antigos primeiro
         const dateA = new Date(a.lastActivityAt).getTime();
         const dateB = new Date(b.lastActivityAt).getTime();
         return dateA - dateB;
       } else {
-        // Padrão: mais recentes primeiro
         const dateA = new Date(a.lastActivityAt).getTime();
         const dateB = new Date(b.lastActivityAt).getTime();
         return dateB - dateA;
@@ -123,6 +114,8 @@ export async function GET(request: NextRequest) {
     const totalPages = Math.ceil(totalCount / limit);
     const paginatedItems = allGroupedItems.slice(skip, skip + limit);
 
+    const hasMore = page < totalPages;
+
     return NextResponse.json({
       items: paginatedItems,
       pagination: {
@@ -133,6 +126,7 @@ export async function GET(request: NextRequest) {
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1,
       },
+      hasMore,
     });
   } catch (error) {
     console.error('Erro ao buscar inventário agrupado:', error);
