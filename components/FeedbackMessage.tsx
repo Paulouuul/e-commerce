@@ -46,20 +46,20 @@ const alignClasses = {
   end: 'items-end',
 };
 
-export function FeedbackMessage({ 
-  type, 
-  message, 
-  className = '', 
+export function FeedbackMessage({
+  type,
+  message,
+  className = '',
   onDismiss,
   align = 'center',
 }: FeedbackMessageProps) {
   if (!message) return null;
-  
+
   const variant = variants[type];
   const Icon = variant.icon;
   const alignClass = alignClasses[align];
   return (
-    <div 
+    <div
       className={`
         ${variant.bg} 
         ${variant.text} 
@@ -72,7 +72,7 @@ export function FeedbackMessage({
       <Icon className="w-4 h-4 shrink-0" />
       <span className="leading-relaxed flex-1">{message}</span>
       {onDismiss && (
-        <button 
+        <button
           onClick={onDismiss}
           className="text-current opacity-50 hover:opacity-100 transition"
         >

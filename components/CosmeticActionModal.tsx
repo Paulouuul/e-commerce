@@ -359,19 +359,9 @@ export function CosmeticActionModal({
         {/* CONTEÚDO SCROLLÁVEL */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-5">
           {/* MENSAGENS DE FEEDBACK */}
-          {errorMessage && (
-            <FeedbackMessage 
-    type="error" 
-    message={errorMessage}
-    align="start"
-  />
-          )}
+          {errorMessage && <FeedbackMessage type="error" message={errorMessage} align="start" />}
           {successMessage && (
-            <FeedbackMessage 
-    type="success" 
-    message={successMessage}
-    align="start"
-  />
+            <FeedbackMessage type="success" message={successMessage} align="start" />
           )}
 
           {/* IMAGEM E INFOS BASE */}

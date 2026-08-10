@@ -361,19 +361,9 @@ export default function EditProfilePage() {
         </div>
 
         {/* Alertas */}
-        {error && (
-          <FeedbackMessage 
-    type="error" 
-    message={error} 
-  />
-        )}
+        {error && <FeedbackMessage type="error" message={error} />}
 
-        {success && (
-          <FeedbackMessage 
-    type="success" 
-    message={success} 
-  />
-        )}
+        {success && <FeedbackMessage type="success" message={success} />}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* SEÇÃO: Imagem de Capa (Cover) */}
