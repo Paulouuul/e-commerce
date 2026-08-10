@@ -162,9 +162,9 @@ export default function MyCosmeticsPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 sm:py-12 flex flex-col h-screen overflow-hidden">
+    <div className="max-w-7xl mx-auto px-4 pt-4 sm:pt-6 flex flex-col h-screen overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8 pb-6 border-b border-slate-800/60 shrink-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-slate-800/60 shrink-0">
         <div>
           <h1 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-linear-to-r from-white via-slate-200 to-slate-400 tracking-wide flex items-center gap-3">
             <Package className="w-7 h-7 sm:w-8 sm:h-8 text-purple-500 shrink-0" />
@@ -185,7 +185,7 @@ export default function MyCosmeticsPage() {
       </div>
 
       {/* Filtros */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6 shrink-0">
+      <div className="flex flex-col sm:flex-row gap-4 mb-4 shrink-0">
         <div className="flex-1 relative">
           <button
             onClick={() => setSearchTerm(searchInput)}
@@ -231,7 +231,7 @@ export default function MyCosmeticsPage() {
       </div>
 
       {/* Filtros de Status */}
-      <div className="flex flex-wrap sm:flex-nowrap gap-2 mb-6 bg-slate-900/60 border border-slate-800/80 rounded-xl p-1.5 w-full sm:w-fit shadow-inner backdrop-blur-sm shrink-0">
+      <div className="flex flex-wrap sm:flex-nowrap gap-2 mb-4 bg-slate-900/60 border border-slate-800/80 rounded-xl p-1.5 w-full sm:w-fit shadow-inner backdrop-blur-sm shrink-0">
         <button
           onClick={() => setActiveFilter('unlisted')}
           className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-[transform,border-color,background-color,box-shadow] ${
