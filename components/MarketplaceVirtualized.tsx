@@ -136,8 +136,16 @@ export function MarketplaceVirtualized({
   }, [listings, columns]);
 
   const estimateSize = (index: number) => {
-    return index === groupedListings.length ? 60 : 306;
-  };
+  // Altura do loader
+  if (index === groupedListings.length) return 60;
+
+  // Calcula a altura baseado no tamanho da tela (h-62.5 = 250px | h-67.5 = 270px)
+  const isMobile = typeof window !== 'undefined' ? window.innerWidth < 640 : false;
+  const cardHeight = isMobile ? 250 : 270;
+  const verticalSpacing = 16; // Ajuste esse valor para aumentar/diminuir o gap vertical
+
+  return cardHeight + verticalSpacing;
+};
 
   const virtualCount = hasMore ? groupedListings.length + 1 : groupedListings.length;
 
@@ -250,7 +258,7 @@ export function MarketplaceVirtualized({
                 display: 'grid',
                 gridTemplateColumns: `repeat(${columns}, 1fr)`,
                 gap: '8px',
-                padding: '4px 8px',
+                padding: '4px 8px 8px 8px',
               }}
             >
               {rowItems.map((listing) => {
