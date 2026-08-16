@@ -58,7 +58,7 @@ export default function MarketplacePage() {
           setLoading(true);
         }
 
-        const url = new URL('/api/cosmetics/marketplace', window.location.origin);
+        const url = new URL('/api/worldo/cosmetics/marketplace', window.location.origin);
         if (rarityFilter !== 'all') url.searchParams.set('rarity', rarityFilter);
         url.searchParams.set('sort', sort);
         url.searchParams.set('limit', '56');

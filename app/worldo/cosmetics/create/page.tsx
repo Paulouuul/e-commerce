@@ -126,7 +126,7 @@ export default function CreateCosmeticPage() {
   useEffect(() => {
     if (!formData.rarity) return;
 
-    fetch(`/api/cosmetics/creation/packages?rarity=${formData.rarity}`)
+    fetch(`/api/worldo/cosmetics/creation/packages?rarity=${formData.rarity}`)
       .then((res) => res.json())
       .then((data) => {
         setPackages(data);
@@ -188,7 +188,7 @@ export default function CreateCosmeticPage() {
 
     const controller = new AbortController();
 
-    fetch(`/api/user/${session.user.publicId}`, { signal: controller.signal })
+    fetch(`/api/worldo/user/${session.user.publicId}`, { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
         if (data?.avatar) setAvatarUrl(data.avatar);

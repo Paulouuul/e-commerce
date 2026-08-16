@@ -58,7 +58,7 @@ export default function MyCosmeticsPage() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const res = await fetch('/api/cosmetics/inventory/stats');
+      const res = await fetch('/api/worldo/cosmetics/inventory/stats');
       const data = await res.json();
       setStatsData(data);
     } catch (err) {
@@ -76,7 +76,7 @@ export default function MyCosmeticsPage() {
         }
 
         const res = await fetch(
-          `/api/cosmetics/inventory/grouped?page=${page}&limit=56&filter=${activeFilter}&search=${encodeURIComponent(searchTerm)}&rarity=${rarityFilter}&sort=${sort}`,
+          `/api/worldo/cosmetics/inventory/grouped?page=${page}&limit=56&filter=${activeFilter}&search=${encodeURIComponent(searchTerm)}&rarity=${rarityFilter}&sort=${sort}`,
         );
         if (!res.ok) throw new Error('Falha ao sincronizar inventário');
 
@@ -117,7 +117,7 @@ export default function MyCosmeticsPage() {
 
     const controller = new AbortController();
 
-    fetch(`/api/user/${session.user.publicId}`, { signal: controller.signal })
+    fetch(`/api/worldo/user/${session.user.publicId}`, { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
         if (data?.avatar) setAvatarUrl(data.avatar);

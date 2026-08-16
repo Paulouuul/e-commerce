@@ -45,7 +45,7 @@ export default function CoinsPage() {
     if (status === 'authenticated' && !hasFetched.current) {
       hasFetched.current = true;
 
-      fetch('/api/coins/packages')
+      fetch('/api/worldo/coins/packages')
         .then((res) => res.json())
         .then((data) => {
           if (Array.isArray(data) && data.length > 0) {
@@ -102,7 +102,7 @@ export default function CoinsPage() {
     setShowConfirmModal(false);
 
     try {
-      const res = await fetch('/api/coins/buy', {
+      const res = await fetch('/api/worldo/coins/buy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ packageId: selectedPackage.id }),

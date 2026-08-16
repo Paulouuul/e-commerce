@@ -26,7 +26,7 @@ export const useCoinStore = create<CoinStore>()(
         set({ isLoading: true });
 
         try {
-          const res = await fetch('/api/coins/balance');
+          const res = await fetch('/api/worldo/coins/balance');
           const data = await res.json();
 
           set({

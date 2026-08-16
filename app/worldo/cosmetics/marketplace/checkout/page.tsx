@@ -133,7 +133,7 @@ export default function CheckoutPage() {
     }));
 
     try {
-      const res = await fetch('/api/cosmetics/marketplace/checkout', {
+      const res = await fetch('/api/worldo/cosmetics/marketplace/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

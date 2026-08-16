@@ -13,7 +13,7 @@ export const useEquippedFrame = (frameId: string | null) => {
 
     const fetchFrame = async () => {
       try {
-        const res = await fetch(`/api/cosmetics/${frameId}`);
+        const res = await fetch(`/api/worldo/cosmetics/${frameId}`);
         const data = await res.json();
         setFrameData(data);
       } catch (err) {

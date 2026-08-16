@@ -100,7 +100,7 @@ export default function ListingDetailPage() {
   const MAX_QUANTITY_PER_ITEM = 99;
 
   useEffect(() => {
-    fetch(`/api/cosmetics/listings/${listingId}`)
+    fetch(`/api/worldo/cosmetics/listings/${listingId}`)
       .then((res) => {
         if (!res.ok) throw new Error('Anúncio não encontrado');
         return res.json();

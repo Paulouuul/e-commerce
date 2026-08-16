@@ -99,7 +99,7 @@ export default function SellerPage() {
           setLoading(true);
         }
 
-        const url = new URL(`/api/cosmetics/seller/${userIdentifier}`, window.location.origin);
+        const url = new URL(`/api/worldo/cosmetics/seller/${userIdentifier}`, window.location.origin);
 
         if (rarityFilter !== 'all') url.searchParams.set('rarity', rarityFilter);
         url.searchParams.set('sort', sort);

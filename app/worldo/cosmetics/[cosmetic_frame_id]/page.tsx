@@ -68,7 +68,7 @@ export default function CosmeticDetailPage() {
   const frameId = params.cosmetic_frame_id as string;
 
   useEffect(() => {
-    fetch(`/api/cosmetics/${frameId}`)
+    fetch(`/api/worldo/cosmetics/${frameId}`)
       .then((res) => res.json())
       .then((data) => {
         setFrame(data);
@@ -83,7 +83,7 @@ export default function CosmeticDetailPage() {
   const handleBuy = async () => {
     if (!selectedListing) return;
     try {
-      const res = await fetch('/api/cosmetics/buy', {
+      const res = await fetch('/api/worldo/cosmetics/buy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

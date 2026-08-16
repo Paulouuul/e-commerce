@@ -118,7 +118,7 @@ export function CosmeticActionModal({
   useEffect(() => {
     const fetchPlatformFee = async () => {
       try {
-        const res = await fetch('/api/cosmetics/listings/platform_fee');
+        const res = await fetch('/api/worldo/cosmetics/listings/platform_fee');
         const data = await res.json();
         if (res.ok) {
           setPlatformFee(data.platform_fee);
@@ -139,7 +139,7 @@ export function CosmeticActionModal({
       setSubmitting(true);
       setErrorMessage('');
       try {
-        const res = await fetch('/api/cosmetics/item/unequip', {
+        const res = await fetch('/api/worldo/cosmetics/item/unequip', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -166,7 +166,7 @@ export function CosmeticActionModal({
       setSubmitting(true);
       setErrorMessage('');
       try {
-        const res = await fetch('/api/cosmetics/item/equip', {
+        const res = await fetch('/api/worldo/cosmetics/item/equip', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ frameId: item.frameId }),
@@ -210,7 +210,7 @@ export function CosmeticActionModal({
     setErrorMessage('');
 
     try {
-      const res = await fetch('/api/cosmetics/listings/create', {
+      const res = await fetch('/api/worldo/cosmetics/listings/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ frameId: item.frameId, quantity, priceCoins: price }),
@@ -243,7 +243,7 @@ export function CosmeticActionModal({
     setSubmitting(true);
     setErrorMessage('');
     try {
-      const res = await fetch('/api/cosmetics/listings/update-price', {
+      const res = await fetch('/api/worldo/cosmetics/listings/update-price', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ listingId: item.listingId, priceCoins: price }),
@@ -271,7 +271,7 @@ export function CosmeticActionModal({
     setSubmitting(true);
     setErrorMessage('');
     try {
-      const res = await fetch('/api/cosmetics/listings/remove', {
+      const res = await fetch('/api/worldo/cosmetics/listings/remove', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ listingId: item.listingId, quantity }),
